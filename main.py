@@ -1,0 +1,4 @@
+import pygad
+
+
+pygad.GA()
