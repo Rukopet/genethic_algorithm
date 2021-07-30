@@ -18,8 +18,8 @@ MAX_GENERATIONS = 1000  # максимальное количество поко
 IN_DEEP = 5
 IN_WIDTH = 4
 
-RANDOM_SEED = 20
-random.seed(RANDOM_SEED)
+# RANDOM_SEED = 20
+# random.seed(RANDOM_SEED)
 
 
 def first_generation() -> List[list]:
@@ -46,58 +46,64 @@ def setTournament(population: list) -> List[list]:
     for _ in range(p_len):
         ind1 = ind2 = ind3 = 0
         while ind1 == ind2 or ind2 == ind3 or ind3 == ind1:
-            ind1, ind2, ind3 = random.randint(0, p_len - 1), random.randint(0, p_len - 1), random.randint(0, p_len - 1)
+            ind1, ind2, ind3 = random.randint(0, p_len - 1), random.randint(0, p_len - 1), random.randint(0,
+                                                                                                          p_len - 1)
 
         ret.append(deepcopy(max(population[ind1], population[ind2], population[ind3])))
     return ret
 
 
 def exchangeGenes(parent1: list, parent2: list):
-    wrap = random.randint(2, len(parent1) - 1)
-    parent1[:wrap], parent2[:wrap] = parent2[:wrap], parent1[:wrap]
+    for i in range(len(parent1)):
+        if random.random() // (P_MUTATION % 100) == 0:
+            parent2[i], parent1[i] = parent1[i], parent2[i]
 
 
 def mutation(individ, propability):
-    for i in individ:
+    for i in enumerate(individ):
         for j in i:
             if random.random() < propability:
                 j = random.randint(-200, 200)
 
 
-iteration = 0
-max_fittness = -1000
-population = first_generation()
+def main():
+    iteration = 0
+    max_fittness = -1000
+    population = first_generation()
+    #
+    maxFitnessValues = []
+    meanFitnessValues = []
 
-maxFitnessValues = []
-meanFitnessValues = []
+    while iteration < MAX_GENERATIONS and max_fittness < 0:
+        iteration += 1
+        winner_tournament = setTournament(population)
+        for parent1, parent2 in zip(winner_tournament[::2], winner_tournament[1::2]):
+            if random.random() < P_CROSSOVER:
+                exchangeGenes(parent1, parent2)
 
-while iteration < MAX_GENERATIONS and max_fittness < 0:
-    iteration += 1
-    winner_tournament = setTournament(population)
-    for parent1, parent2 in zip(winner_tournament[::2], winner_tournament[1::2]):
-        if random.random() < P_CROSSOVER:
-            exchangeGenes(parent1, parent2)
+        for mutant in winner_tournament:
+            if random.random() < P_MUTATION:
+                mutation(mutant, 1.0 / IN_DEEP * IN_WIDTH)
 
-    for mutant in winner_tournament:
-        if random.random() < P_MUTATION:
-            mutation(mutant, 1.0 / IN_DEEP * IN_WIDTH)
+        tmp_fit = getFitnessPopulation(winner_tournament)
+        max_value, index_max_value = max([(v, i) for i, v in enumerate(tmp_fit)])
 
-    tmp_fit = getFitnessPopulation(winner_tournament)
-    max_value, index_max_value = max([(v, i) for i, v in enumerate(tmp_fit)])
+        mean = max_value / POPULATION_SIZE
+        maxFitnessValues.append(max_value)
+        meanFitnessValues.append(mean)
+        print(f"Поколение {iteration}: Макс приспособ. = {max_value}, Средняя приспособ.= {mean}")
+        print("Лучший индивидуум = ", *population[index_max_value], "\n")
+        print(
+            f"\t\t\t[ {sum(population[index_max_value][0])} ]\t[ {sum(population[index_max_value][1])} ]\t[ {sum(population[index_max_value][2])} ]\t[ {sum(population[index_max_value][3])} ]")
 
-    mean = max_value / POPULATION_SIZE
-    maxFitnessValues.append(max_value)
-    meanFitnessValues.append(mean)
-    print(f"Поколение {iteration}: Макс приспособ. = {max_value}, Средняя приспособ.= {mean}")
-    print("Лучший индивидуум = ", *population[index_max_value], "\n")
-    print(f"\t\t\t[ {sum(population[index_max_value][0])} ]\t[ {sum(population[index_max_value][1])} ]\t[ {sum(population[index_max_value][2])} ]\t[ {sum(population[index_max_value][3])} ]")
-
-plt.plot(maxFitnessValues, color='red')
-plt.plot(meanFitnessValues, color='green')
-plt.xlabel('Поколение')
-plt.ylabel('Макс/средняя приспособленность')
-plt.title('Зависимость максимальной и средней приспособленности от поколения')
-plt.savefig("new")
-plt.show()
+    plt.plot(maxFitnessValues, color='red')
+    plt.plot(meanFitnessValues, color='green')
+    plt.xlabel('Поколение')
+    plt.ylabel('Макс/средняя приспособленность')
+    plt.title('Зависимость максимальной и средней приспособленности от поколения')
+    plt.savefig("new")
+    plt.show()
 
 
+if __name__ == '__main__':
+    main()
