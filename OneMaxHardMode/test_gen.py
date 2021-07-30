@@ -2,8 +2,12 @@ import random
 import matplotlib.pyplot as plt
 
 # константы задачи
-ONE_MAX_LENGTH = 100  # длина подлежащей оптимизации битовой строки
+import numpy as np
 
+ONE_MAX_LENGTH = 20  # длина подлежащей оптимизации битовой строки
+LEN_IN_LIST = 5  # вложенная длина
+
+MAX_FITNESS = 100
 # константы генетического алгоритма
 POPULATION_SIZE = 200  # количество индивидуумов в популяции
 P_CROSSOVER = 0.9  # вероятность скрещивания
@@ -26,11 +30,11 @@ class Individual(list):
 
 
 def oneMaxFitness(individual):
-    return sum(individual),  # кортеж
+    return np.sum(individual),  # кортеж
 
 
 def individualCreator():
-    return Individual([random.randint(0, 1) for i in range(ONE_MAX_LENGTH)])
+    return Individual([[random.randint(0, 1) for _ in range(LEN_IN_LIST)] for i in range(ONE_MAX_LENGTH)])
 
 
 def populationCreator(n=0):
@@ -39,7 +43,6 @@ def populationCreator(n=0):
 
 population = populationCreator(n=POPULATION_SIZE)
 generationCounter = 0
-
 fitnessValues = list(map(oneMaxFitness, population))
 
 for individual, fitnessValue in zip(population, fitnessValues):
@@ -77,10 +80,9 @@ def mutFlipBit(mutant, indpb=0.01):
         if random.random() < indpb:
             mutant[indx] = 0 if mutant[indx] == 1 else 1
 
-
 fitnessValues = [individual.fitness.values[0] for individual in population]
 
-while max(fitnessValues) < ONE_MAX_LENGTH and generationCounter < MAX_GENERATIONS:
+while max(fitnessValues) < MAX_FITNESS and generationCounter < MAX_GENERATIONS:
     generationCounter += 1
     offspring = selTournament(population, len(population))
     offspring = list(map(clone, offspring))
@@ -93,7 +95,10 @@ while max(fitnessValues) < ONE_MAX_LENGTH and generationCounter < MAX_GENERATION
         if random.random() < P_MUTATION:
             mutFlipBit(mutant, indpb=1.0 / ONE_MAX_LENGTH)
 
-    freshFitnessValues = list(map(oneMaxFitness, offspring))
+    freshFitnessValues = []
+    for j in offspring:
+        freshFitnessValues.append(oneMaxFitness(j))
+
     for individual, fitnessValue in zip(offspring, freshFitnessValues):
         individual.fitness.values = fitnessValue
 
@@ -115,4 +120,5 @@ plt.plot(meanFitnessValues, color='green')
 plt.xlabel('Поколение')
 plt.ylabel('Макс/средняя приспособленность')
 plt.title('Зависимость максимальной и средней приспособленности от поколения')
+plt.savefig("new")
 plt.show()
