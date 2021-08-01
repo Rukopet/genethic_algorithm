@@ -12,6 +12,8 @@ MAX_GENERATIONS = 200  # максимальное количество поко�
 
 RANDOM_SEED = 42
 import pandas as pd
+
+
 # random.seed(RANDOM_SEED)
 
 
@@ -110,5 +112,9 @@ def main():
     plt.show()
     return
 
+
 if __name__ == '__main__':
-    main()
+    fix, ax = plt.subplots(5, 5)
+    
+    plt.show()
+    # main()

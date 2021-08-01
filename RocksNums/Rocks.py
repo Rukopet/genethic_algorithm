@@ -18,8 +18,8 @@ MAX_GENERATIONS = 1000  # максимальное количество поко
 IN_DEEP = 5
 IN_WIDTH = 4
 
-# RANDOM_SEED = 20
-# random.seed(RANDOM_SEED)
+RANDOM_SEED = 20
+random.seed(RANDOM_SEED)
 
 
 def first_generation() -> List[list]:
@@ -87,6 +87,7 @@ def main():
 
         tmp_fit = getFitnessPopulation(winner_tournament)
         max_value, index_max_value = max([(v, i) for i, v in enumerate(tmp_fit)])
+        a.index(max(a))
 
         mean = max_value / POPULATION_SIZE
         maxFitnessValues.append(max_value)
