@@ -5,21 +5,25 @@ from copy import deepcopy
 
 from matplotlib import pyplot as plt
 
+from utils.timeit import timeit_our
+
 FITNESS_LIST_STANDARD = [50, 32, 232, 236]
 # FITNESS_LIST_STANDARD = [8, 12, 16, 20]
 # kek = [[2,2,2,2],[3,3,3,3],[4,4,4,4],[5,5,5,5]]
 
-POPULATION_SIZE = 15000  # количество индивидуумов в популяции
+POPULATION_SIZE = 500  # количество индивидуумов в популяции
 
 P_CROSSOVER = 0.9  # вероятность скрещивания
-P_MUTATION = 0.1  # вероятность мутации индивидуума
-MAX_GENERATIONS = 50  # максимальное количество поколений
+P_MUTATION = 0.3  # вероятность мутации индивидуума
+MAX_GENERATIONS = 500  # максимальное количество поколений
 
 IN_DEEP = 5
 IN_WIDTH = 4
 
 RANDOM_SEED = 20
-random.seed(RANDOM_SEED)
+
+
+# random.seed(RANDOM_SEED)
 
 
 def first_generation() -> List[list]:
@@ -47,12 +51,13 @@ def setTournament(population: list) -> List[list]:
     ret = []
     p_len = len(population)
     for _ in range(p_len):
-        ind1 = ind2 = ind3 = 0
+        ind1 = ind2 = ind3 = ind4 = 0
         while ind1 == ind2 or ind2 == ind3 or ind3 == ind1:
-            ind1, ind2, ind3 = random.randint(0, p_len - 1), random.randint(0, p_len - 1), random.randint(0,
-                                                                                                          p_len - 1)
+            ind1, ind2, ind3 = random.randint(0, p_len - 1), random.randint(0, p_len - 1), \
+                               random.randint(0, p_len - 1)
 
-        ret.append(deepcopy(max([population[ind1], population[ind2], population[ind3]], key=getFitnessIndividual)))
+        ret.append(deepcopy(max([population[ind1], population[ind2], population[ind3]],
+                                key=getFitnessIndividual)))
     return ret
 
 
@@ -63,12 +68,13 @@ def exchangeGenes(parent1: list, parent2: list):
 
 
 def mutation(individ, propability):
-    for i in enumerate(individ):
-        for j in i:
+    for ind, value in enumerate(individ):
+        for j in range(len(value)):
             if random.random() < propability:
-                j = random.randint(-200, 200)
+                individ[ind][j] = random.randint(-200, 200)
 
 
+@timeit_our
 def main():
     iteration = 0
     max_fittness = -1000
